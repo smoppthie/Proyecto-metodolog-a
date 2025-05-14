@@ -38,6 +38,3 @@ public class Cliente {
     public String getDireccion() { return direccion; }
     public TipoCliente getTipo() { return tipo; }
 }
-
-
-

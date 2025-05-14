@@ -6,3 +6,4 @@ public class PagoConTarjeta implements MetodoDePago {
         System.out.println("Procesando pago con tarjeta por $" + monto);
     }
 }
+

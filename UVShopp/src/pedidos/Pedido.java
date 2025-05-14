@@ -36,31 +36,51 @@ public class Pedido {
     }
 
     public void pagar() {
+        if ("pagado".equalsIgnoreCase(estado)) {
+            throw new IllegalStateException("El pedido ya está pagado");
+        }
         metodoPago.procesarPago(calcularTotal());
         estado = "pagado";
     }
 
     public void prepararEnvio() {
-        if (!"pagado".equals(estado)) throw new IllegalStateException("Pedido no pagado");
+        if (!"pagado".equalsIgnoreCase(estado)) throw new IllegalStateException("Pedido no pagado");
         estado = "en preparación";
     }
 
     public void enviar() {
-        if (!"en preparación".equals(estado)) throw new IllegalStateException("Pedido no está en preparación");
+        if (!"en preparación".equalsIgnoreCase(estado)) throw new IllegalStateException("Pedido no está en preparación");
         estado = "enviado";
     }
 
     public void entregar() {
-        if (!"enviado".equals(estado)) throw new IllegalStateException("Pedido no ha sido enviado");
+        if (!"enviado".equalsIgnoreCase(estado)) throw new IllegalStateException("Pedido no ha sido enviado");
         estado = "entregado";
     }
 
     public void cancelar() {
-        if ("pagado".equals(estado)) {
+        if ("pagado".equalsIgnoreCase(estado) || "en preparación".equalsIgnoreCase(estado)) {
             estado = "cancelado";
         } else {
-            throw new IllegalStateException("No se puede cancelar un pedido no pagado o ya entregado");
+            throw new IllegalStateException("No se puede cancelar un pedido en estado: " + estado);
         }
+    }
+
+    // Nuevo método para recuperar pedidos cancelados
+    public void recuperar() {
+        if (!"cancelado".equalsIgnoreCase(estado)) {
+            throw new IllegalStateException("Solo se pueden recuperar pedidos cancelados.");
+        }
+        estado = "pagado";
+    }
+
+    // Setters para modificar tipo de pedido y método de pago
+    public void setTipoPedido(TipoPedido tipoPedido) {
+        this.tipoPedido = tipoPedido;
+    }
+
+    public void setMetodoPago(MetodoDePago metodoPago) {
+        this.metodoPago = metodoPago;
     }
 
     // Getters
@@ -70,4 +90,3 @@ public class Pedido {
     public String getEstado() { return estado; }
     public TipoPedido getTipoPedido() { return tipoPedido; }
 }
-

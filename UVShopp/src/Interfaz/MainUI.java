@@ -209,11 +209,13 @@ public class MainUI {
 
     private void abrirInterfazAdministrador() {
         JFrame adminFrame = new JFrame("Interfaz Administrador");
-        adminFrame.setSize(600, 600);
+        adminFrame.setSize(600, 700);
         adminFrame.setLocationRelativeTo(null);
         JPanel panelAdmin = new JPanel(new GridLayout(0, 1, 10, 10));
 
         JButton btnVerPedidos = new JButton("Ver Pedidos");
+        JButton btnRecuperarPedido = new JButton("Recuperar Pedido");
+        JButton btnModificarPedido = new JButton("Modificar Pedido");
         JButton btnPrepararEnvio = new JButton("Preparar Envío");
         JButton btnEnviarPedido = new JButton("Enviar Pedido");
         JButton btnCancelarPedido = new JButton("Cancelar Pedido");
@@ -227,6 +229,8 @@ public class MainUI {
         JScrollPane scrollPane = new JScrollPane(areaAdmin);
 
         panelAdmin.add(btnVerPedidos);
+        panelAdmin.add(btnRecuperarPedido);
+        panelAdmin.add(btnModificarPedido);
         panelAdmin.add(btnPrepararEnvio);
         panelAdmin.add(btnEnviarPedido);
         panelAdmin.add(btnCancelarPedido);
@@ -240,12 +244,72 @@ public class MainUI {
         adminFrame.setVisible(true);
 
         btnVerPedidos.addActionListener(e -> {
-            areaAdmin.setText("Lista de Pedidos:\n");
+            areaAdmin.setText("Lista de Pedidos (pagados, en preparación, enviados, entregados y cancelados):\n");
             for (Pedido pedido : pedidos) {
-                areaAdmin.append("ID: " + pedido.getId() + " | Cliente: " + pedido.getCliente().getNombre() +
-                        " | Tipo: " + pedido.getTipoPedido().getDescripcion() + " | Estado: " + pedido.getEstado() +
-                        " | Total: $" + pedido.calcularTotal() + "\n");
+                String estado = pedido.getEstado();
+                if (estado.equalsIgnoreCase("pagado") ||
+                    estado.equalsIgnoreCase("en preparación") ||
+                    estado.equalsIgnoreCase("enviado") ||
+                    estado.equalsIgnoreCase("entregado") ||
+                    estado.equalsIgnoreCase("cancelado")) {
+                    areaAdmin.append("ID: " + pedido.getId() + " | Cliente: " + pedido.getCliente().getNombre() +
+                            " | Tipo: " + pedido.getTipoPedido().getDescripcion() + " | Estado: " + estado +
+                            " | Total: $" + pedido.calcularTotal() + "\n");
+                }
             }
+        });
+
+        btnRecuperarPedido.addActionListener(e -> {
+            String id = JOptionPane.showInputDialog(adminFrame, "Ingrese ID del pedido para recuperar:");
+            Pedido pedido = buscarPedidoPorId(id);
+            if (pedido != null) {
+                try {
+                    if ("cancelado".equalsIgnoreCase(pedido.getEstado())) {
+                        pedido.recuperar();
+                        areaAdmin.append("Pedido " + id + " ha sido RECUPERADO y está ahora en estado PAGADO.\n");
+                    } else {
+                        JOptionPane.showMessageDialog(adminFrame, "El pedido no está cancelado, no necesita recuperación.");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(adminFrame, "Error al recuperar pedido: " + ex.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(adminFrame, "Pedido no encontrado.");
+            }
+        });
+
+        btnModificarPedido.addActionListener(e -> {
+            String id = JOptionPane.showInputDialog(adminFrame, "Ingrese ID del pedido a modificar:");
+            Pedido pedido = buscarPedidoPorId(id);
+            if (pedido == null) {
+                JOptionPane.showMessageDialog(adminFrame, "Pedido no encontrado.");
+                return;
+            }
+            if (pedido.getEstado().equalsIgnoreCase("enviado") ||
+                pedido.getEstado().equalsIgnoreCase("entregado") ||
+                pedido.getEstado().equalsIgnoreCase("cancelado")) {
+                JOptionPane.showMessageDialog(adminFrame, "No se puede modificar un pedido en estado " + pedido.getEstado());
+                return;
+            }
+            String[] tiposPedido = {"Estándar", "Exprés", "Programado", "Internacional"};
+            String nuevoTipoPedidoStr = (String) JOptionPane.showInputDialog(adminFrame,
+                    "Seleccione nuevo tipo de pedido:", "Modificar Tipo Pedido",
+                    JOptionPane.QUESTION_MESSAGE, null, tiposPedido, pedido.getTipoPedido().getDescripcion());
+
+            if (nuevoTipoPedidoStr != null && !nuevoTipoPedidoStr.trim().isEmpty()) {
+                TipoPedido nuevoTipoPedido = obtenerTipoPedidoDesdeString(nuevoTipoPedidoStr);
+                pedido.setTipoPedido(nuevoTipoPedido);
+            }
+
+            String nuevoMetodoPagoStr = (String) JOptionPane.showInputDialog(adminFrame,
+                    "Seleccione nuevo método de pago:", "Modificar Método de Pago",
+                    JOptionPane.QUESTION_MESSAGE, null, metodosPagoDisponibles.toArray(new String[0]), null);
+            if (nuevoMetodoPagoStr != null && !nuevoMetodoPagoStr.trim().isEmpty()) {
+                MetodoDePago nuevoMetodoPago = obtenerMetodoPagoDesdeString(nuevoMetodoPagoStr);
+                pedido.setMetodoPago(nuevoMetodoPago);
+            }
+
+            areaAdmin.append("Pedido " + id + " modificado correctamente.\n");
         });
 
         btnPrepararEnvio.addActionListener(e -> {
@@ -327,4 +391,3 @@ public class MainUI {
         SwingUtilities.invokeLater(MainUI::new);
     }
 }
-
