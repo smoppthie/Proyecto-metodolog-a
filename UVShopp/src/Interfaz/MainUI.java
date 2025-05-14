@@ -177,6 +177,11 @@ public class MainUI {
                 textArea.append("Total: " + pedido.calcularTotal() + "\n");
                 textArea.append("Método de Pago: " + metodoPagoStr + "\n");
                 textArea.append("Stock Restante: " + productoSeleccionado.getCantidadStock() + "\n");
+
+                // Generar y mostrar factura
+                Factura factura = new Factura("F" + pedido.getId(), pedido);
+                textArea.append("\n--- FACTURA ---\n");
+                textArea.append(factura.generarResumen());
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(clienteFrame, "Error: " + ex.getMessage());
             }

@@ -66,7 +66,6 @@ public class Pedido {
         }
     }
 
-    // Nuevo método para recuperar pedidos cancelados
     public void recuperar() {
         if (!"cancelado".equalsIgnoreCase(estado)) {
             throw new IllegalStateException("Solo se pueden recuperar pedidos cancelados.");
@@ -74,7 +73,6 @@ public class Pedido {
         estado = "pagado";
     }
 
-    // Setters para modificar tipo de pedido y método de pago
     public void setTipoPedido(TipoPedido tipoPedido) {
         this.tipoPedido = tipoPedido;
     }
@@ -83,7 +81,6 @@ public class Pedido {
         this.metodoPago = metodoPago;
     }
 
-    // Getters
     public String getId() { return id; }
     public Cliente getCliente() { return cliente; }
     public List<Producto> getProductos() { return productos; }
