@@ -9,9 +9,9 @@ import pagos.PagoConTransferencia;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainUI {
     private JFrame frame;
@@ -24,61 +24,52 @@ public class MainUI {
     // Lista de productos disponibles
     private ArrayList<Producto> productosDisponibles;
 
+    // Lista estática para almacenar los pedidos creados
+    private static ArrayList<Pedido> pedidos = new ArrayList<>();
+
+    // Lista dinámica para métodos de pago disponibles
+    private static ArrayList<String> metodosPagoDisponibles = new ArrayList<>(Arrays.asList("Tarjeta", "Transferencia"));
+
     public MainUI() {
-        // Inicialización de productos disponibles
+        // Inicializar productos disponibles
         productosDisponibles = new ArrayList<>();
         productosDisponibles.add(new Producto("Producto A", "A001", 100.0, 50));
         productosDisponibles.add(new Producto("Producto B", "B001", 200.0, 30));
         productosDisponibles.add(new Producto("Producto C", "C001", 150.0, 20));
 
-        // Crear la ventana de selección de rol
+        // Crear ventana inicial selección de rol
         frame = new JFrame("Seleccionar Rol");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 200);
         frame.setLocationRelativeTo(null);
-        panel = new JPanel();
-        panel.setLayout(new GridLayout(0, 1));
+        panel = new JPanel(new GridLayout(0, 1));
 
-        // Crear botones para elegir rol
         btnCliente = new JButton("Soy Cliente");
         btnAdministrador = new JButton("Soy Administrador");
 
-        // Agregar botones al panel
         panel.add(btnCliente);
         panel.add(btnAdministrador);
 
-        // Agregar panel al marco
         frame.add(panel);
         frame.setVisible(true);
 
-        // Acción para seleccionar Cliente
-        btnCliente.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);  // Ocultar la ventana de selección de rol
-                abrirInterfazCliente();   // Abrir la interfaz de Cliente
-            }
+        btnCliente.addActionListener(e -> {
+            frame.setVisible(false);
+            abrirInterfazCliente();
         });
 
-        // Acción para seleccionar Administrador
-        btnAdministrador.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);  // Ocultar la ventana de selección de rol
-                abrirInterfazAdministrador();   // Abrir la interfaz de Administrador
-            }
+        btnAdministrador.addActionListener(e -> {
+            frame.setVisible(false);
+            abrirInterfazAdministrador();
         });
     }
 
-    // Interfaz de Cliente
     private void abrirInterfazCliente() {
         JFrame clienteFrame = new JFrame("Interfaz Cliente");
-        clienteFrame.setSize(500, 500);
+        clienteFrame.setSize(500, 550);
         clienteFrame.setLocationRelativeTo(null);
-        JPanel panelCliente = new JPanel();
-        panelCliente.setLayout(new GridLayout(0, 2));
+        JPanel panelCliente = new JPanel(new GridLayout(0, 2, 10, 10));
 
-        // Crear campos de texto para la información del cliente
         panelCliente.add(new JLabel("Nombre:"));
         txtNombre = new JTextField();
         panelCliente.add(txtNombre);
@@ -93,10 +84,9 @@ public class MainUI {
 
         panelCliente.add(new JLabel("Tipo de Cliente (Nuevo, Frecuente, VIP):"));
         String[] tiposCliente = {"Nuevo", "Frecuente", "VIP"};
-        comboTipoCliente = new JComboBox<>(tiposCliente);  // Usamos JComboBox en vez de JTextField
+        comboTipoCliente = new JComboBox<>(tiposCliente);
         panelCliente.add(comboTipoCliente);
 
-        // Crear combo box para seleccionar productos
         panelCliente.add(new JLabel("Seleccionar Producto:"));
         comboProductos = new JComboBox<>();
         for (Producto producto : productosDisponibles) {
@@ -104,23 +94,22 @@ public class MainUI {
         }
         panelCliente.add(comboProductos);
 
-        // Crear combo box para seleccionar tipo de pedido
         panelCliente.add(new JLabel("Tipo de Pedido:"));
         String[] tiposPedido = {"Estándar", "Exprés", "Programado", "Internacional"};
         comboTipoPedido = new JComboBox<>(tiposPedido);
         panelCliente.add(comboTipoPedido);
 
-        // Crear combo box para seleccionar el método de pago
         panelCliente.add(new JLabel("Seleccionar Método de Pago:"));
-        String[] metodosPago = {"Tarjeta", "Transferencia"};
-        comboMetodoPago = new JComboBox<>(metodosPago);
+        // Cargar desde la lista dinámica cada vez que se abre la ventana cliente
+        comboMetodoPago = new JComboBox<>(metodosPagoDisponibles.toArray(new String[0]));
         panelCliente.add(comboMetodoPago);
 
-        // Botón para crear el pedido
         btnCrearPedido = new JButton("Crear Pedido");
         panelCliente.add(btnCrearPedido);
 
-        // Área de texto para mostrar el resumen
+        JButton btnVolverCliente = new JButton("Volver");
+        panelCliente.add(btnVolverCliente);
+
         textArea = new JTextArea(10, 30);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -129,99 +118,122 @@ public class MainUI {
         clienteFrame.add(panelCliente);
         clienteFrame.setVisible(true);
 
-        // Acción para crear el pedido
-        btnCrearPedido.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Crear el cliente con los datos ingresados
-                String nombre = txtNombre.getText();
-                String email = txtEmail.getText();
-                String direccion = txtDireccion.getText();
-                String tipoCliente = (String) comboTipoCliente.getSelectedItem();  // Obtener tipo de cliente
-                Cliente cliente = new Cliente(nombre, email, direccion, tipoCliente);
+        btnCrearPedido.addActionListener(e -> {
+            String nombre = txtNombre.getText();
+            String email = txtEmail.getText();
+            String direccion = txtDireccion.getText();
+            String tipoCliente = (String) comboTipoCliente.getSelectedItem();
+            Cliente cliente = new Cliente(nombre, email, direccion, tipoCliente);
 
-                // Seleccionar el producto elegido
-                Producto productoSeleccionado = productosDisponibles.get(comboProductos.getSelectedIndex());
+            Producto productoSeleccionado = productosDisponibles.get(comboProductos.getSelectedIndex());
 
-                // Crear una lista con el producto seleccionado
-                ArrayList<Producto> productosSeleccionados = new ArrayList<>();
-                productosSeleccionados.add(productoSeleccionado);
+            ArrayList<Producto> productosSeleccionados = new ArrayList<>();
+            productosSeleccionados.add(productoSeleccionado);
 
-                // Seleccionar el tipo de pedido
-                String tipoPedido = (String) comboTipoPedido.getSelectedItem();
+            String tipoPedido = (String) comboTipoPedido.getSelectedItem();
 
-                // Seleccionar el método de pago
-                String metodoPago = (String) comboMetodoPago.getSelectedItem();
-                MetodoDePago metodo = null;
+            String metodoPago = (String) comboMetodoPago.getSelectedItem();
+            MetodoDePago metodo;
 
-                if (metodoPago.equals("Tarjeta")) {
-                    metodo = new PagoConTarjeta();
-                } else if (metodoPago.equals("Transferencia")) {
-                    metodo = new PagoConTransferencia();
-                }
-
-                // Crear el pedido
-                Pedido pedido = new Pedido("P001", cliente, productosSeleccionados, metodo, tipoPedido);
-
-                // Descontar el stock del producto
-                productoSeleccionado.reducirStock(1);  // Se asume que el cliente pide 1 unidad
-
-                // Mostrar los detalles del pedido
-                textArea.setText("Pedido Creado:\n");
-                textArea.append("Cliente: " + cliente.getNombre() + "\n");
-                textArea.append("Producto: " + productoSeleccionado.getNombre() + "\n");
-                textArea.append("Precio: " + productoSeleccionado.getPrecio() + "\n");
-                textArea.append("Stock: " + productoSeleccionado.getCantidadStock() + "\n");
-                textArea.append("Código: " + productoSeleccionado.getCodigo() + "\n");
-                textArea.append("Tipo de Pedido: " + tipoPedido + "\n");
-                textArea.append("Total: " + pedido.calcularTotal() + "\n");
-                textArea.append("Método de Pago: " + metodoPago + "\n");
-                textArea.append("Stock Restante: " + productoSeleccionado.getCantidadStock() + "\n");
+            if (metodoPago.equals("Tarjeta")) {
+                metodo = new PagoConTarjeta();
+            } else if (metodoPago.equals("Transferencia")) {
+                metodo = new PagoConTransferencia();
+            } else {
+                JOptionPane.showMessageDialog(clienteFrame, "Método de pago no implementado, se usará Tarjeta por defecto.");
+                metodo = new PagoConTarjeta();
             }
+
+            Pedido pedido = new Pedido("P001", cliente, productosSeleccionados, metodo, tipoPedido);
+
+            productoSeleccionado.reducirStock(1);
+
+            pedidos.add(pedido);
+
+            textArea.setText("Pedido Creado:\n");
+            textArea.append("Cliente: " + cliente.getNombre() + "\n");
+            textArea.append("Producto: " + productoSeleccionado.getNombre() + "\n");
+            textArea.append("Precio: " + productoSeleccionado.getPrecio() + "\n");
+            textArea.append("Stock: " + productoSeleccionado.getCantidadStock() + "\n");
+            textArea.append("Código: " + productoSeleccionado.getCodigo() + "\n");
+            textArea.append("Tipo de Pedido: " + tipoPedido + "\n");
+            textArea.append("Total: " + pedido.calcularTotal() + "\n");
+            textArea.append("Método de Pago: " + metodoPago + "\n");
+            textArea.append("Stock Restante: " + productoSeleccionado.getCantidadStock() + "\n");
+        });
+
+        btnVolverCliente.addActionListener(e -> {
+            clienteFrame.dispose();
+            frame.setVisible(true);
         });
     }
 
-    // Interfaz de Administrador
     private void abrirInterfazAdministrador() {
         JFrame adminFrame = new JFrame("Interfaz Administrador");
-        adminFrame.setSize(500, 400);
+        adminFrame.setSize(500, 500);
         adminFrame.setLocationRelativeTo(null);
-        JPanel panelAdmin = new JPanel();
-        panelAdmin.setLayout(new GridLayout(0, 1));
+        JPanel panelAdmin = new JPanel(new GridLayout(0, 1, 10, 10));
 
-        // Agregar botones para administrar pedidos
         JButton btnVerPedidos = new JButton("Ver Pedidos");
-        JButton btnAgregarMetodoPago = new JButton("Agregar Método de Pago");
+        JButton btnAdministrarEnvios = new JButton("Administrar Envíos");
+
+        JTextField txtNuevoMetodoPago = new JTextField();
+        JButton btnAgregarNuevoMetodoPago = new JButton("Agregar Método de Pago");
 
         panelAdmin.add(btnVerPedidos);
-        panelAdmin.add(btnAgregarMetodoPago);
+        panelAdmin.add(new JLabel("Nuevo Método de Pago:"));
+        panelAdmin.add(txtNuevoMetodoPago);
+        panelAdmin.add(btnAgregarNuevoMetodoPago);
+        panelAdmin.add(btnAdministrarEnvios);
+
+        JButton btnVolverAdmin = new JButton("Volver");
+        panelAdmin.add(btnVolverAdmin);
+
+        JTextArea areaAdmin = new JTextArea(10, 30);
+        areaAdmin.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(areaAdmin);
+        panelAdmin.add(scrollPane);
 
         adminFrame.add(panelAdmin);
         adminFrame.setVisible(true);
 
-        // Acciones de administrador
-        btnVerPedidos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(adminFrame, "Funcionalidad de Ver Pedidos no implementada aún.");
+        btnVerPedidos.addActionListener(e -> {
+            areaAdmin.setText("Detalles de los Pedidos:\n");
+            for (Pedido pedido : pedidos) {
+                areaAdmin.append("ID: " + pedido.getId() + "\n");
+                areaAdmin.append("Cliente: " + pedido.getCliente().getNombre() + "\n");
+                areaAdmin.append("Tipo de Pedido: " + pedido.getTipoPedido() + "\n");
+                areaAdmin.append("Estado: " + pedido.getEstado() + "\n");
+                areaAdmin.append("Total: " + pedido.calcularTotal() + "\n\n");
             }
         });
 
-        btnAgregarMetodoPago.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(adminFrame, "Funcionalidad de Agregar Método de Pago no implementada aún.");
+        btnAgregarNuevoMetodoPago.addActionListener(e -> {
+            String nuevoMetodo = txtNuevoMetodoPago.getText().trim();
+            if (nuevoMetodo.isEmpty()) {
+                JOptionPane.showMessageDialog(adminFrame, "Ingrese un nombre válido para el método de pago.");
+                return;
             }
+            if (metodosPagoDisponibles.contains(nuevoMetodo)) {
+                JOptionPane.showMessageDialog(adminFrame, "Este método de pago ya existe.");
+                return;
+            }
+            metodosPagoDisponibles.add(nuevoMetodo);
+            JOptionPane.showMessageDialog(adminFrame, "Método de pago agregado correctamente: " + nuevoMetodo);
+            txtNuevoMetodoPago.setText("");
+        });
+
+        btnAdministrarEnvios.addActionListener(e -> {
+            JOptionPane.showMessageDialog(adminFrame, "Funcionalidad de Administrar Envíos no implementada aún.");
+        });
+
+        btnVolverAdmin.addActionListener(e -> {
+            adminFrame.dispose();
+            frame.setVisible(true);
         });
     }
 
     public static void main(String[] args) {
-        // Iniciar la interfaz
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new MainUI();
-            }
-        });
+        SwingUtilities.invokeLater(MainUI::new);
     }
 }

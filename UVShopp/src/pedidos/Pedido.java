@@ -20,40 +20,32 @@ public class Pedido {
         this.productos = productos;
         this.metodoPago = metodoPago;
         this.tipoPedido = tipoPedido;
-        this.estado = "pendiente";
+        this.estado = "pendiente";  // Estado inicial del pedido
     }
 
+    // Método para procesar el pago
     public void pagar() {
-        metodoPago.procesarPago(calcularTotal());
-        estado = "pagado";
+        metodoPago.procesarPago(calcularTotal());  // Llamada al método de pago
+        estado = "pagado";  // Cambiar el estado del pedido a "pagado"
     }
 
+    // Calcular el total del pedido
     public double calcularTotal() {
         double total = 0;
         for (Producto producto : productos) {
-            total += producto.getPrecio();
+            total += producto.getPrecio();  // Sumar el precio de los productos
         }
-        return total - obtenerDescuento();
+        return total;
     }
 
-
-    public double obtenerDescuento() {
-        // Obtener descuento como un valor numérico
-        double descuento = cliente.obtenerDescuento();
-
-        if (descuento == 0.05) {
-            return 0.05;  // 5% descuento
-        } else if (descuento == 0.10) {
-            return 0.10;  // 10% descuento
-        } else if (descuento == 0.15) {
-            return 0.15;  // 15% descuento + envío gratis
-        } else {
-            return 0;  // Sin descuento
-        }
+    // Métodos de acceso a los campos
+    public String getId() {
+        return id;
     }
 
-
-
+    public Cliente getCliente() {
+        return cliente;
+    }
 
     public String getEstado() {
         return estado;

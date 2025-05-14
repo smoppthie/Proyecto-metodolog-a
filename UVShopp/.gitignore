@@ -1,29 +1,82 @@
-### IntelliJ IDEA ###
+# ======================
+# IntelliJ IDEA
+# ======================
+.idea/
+*.iml
+*.iws
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### Eclipse ###
+# ======================
+# Eclipse
+# ======================
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
+.settings/
+.springBeans/
+.sts4-cache/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-### NetBeans ###
+# ======================
+# NetBeans
+# ======================
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# ======================
+# Visual Studio Code
+# ======================
 .vscode/
 
-### Mac OS ###
+# ======================
+# Java compiled class files
+# ======================
+*.class
+
+# ======================
+# Build folders
+# ======================
+build/
+target/
+
+# ======================
+# Gradle
+# ======================
+.gradle/
+
+# ======================
+# Maven
+# ======================
+.mvn/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# ======================
+# Logs and temp files
+# ======================
+*.log
+*.tmp
+*.temp
+*.swp
+
+# ======================
+# System Files
+# ======================
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ======================
+# Others (optional)
+# ======================
+# If you have other folders like coverage, reports, add here
+coverage/
