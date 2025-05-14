@@ -3,55 +3,71 @@ package pedidos;
 import clientes.Cliente;
 import productos.Producto;
 import pagos.MetodoDePago;
+
 import java.util.List;
 
 public class Pedido {
     private String id;
     private Cliente cliente;
     private List<Producto> productos;
+    private TipoPedido tipoPedido;
     private MetodoDePago metodoPago;
-    private String tipoPedido;
-    private String estado;
+    private String estado; // pendiente, pagado, en preparación, enviado, entregado, cancelado
 
-    // Constructor
-    public Pedido(String id, Cliente cliente, List<Producto> productos, MetodoDePago metodoPago, String tipoPedido) {
+    public Pedido(String id, Cliente cliente, List<Producto> productos, TipoPedido tipoPedido, MetodoDePago metodoPago) {
         this.id = id;
         this.cliente = cliente;
         this.productos = productos;
-        this.metodoPago = metodoPago;
         this.tipoPedido = tipoPedido;
-        this.estado = "pendiente";  // Estado inicial del pedido
+        this.metodoPago = metodoPago;
+        this.estado = "pendiente";
     }
 
-    // Método para procesar el pago
-    public void pagar() {
-        metodoPago.procesarPago(calcularTotal());  // Llamada al método de pago
-        estado = "pagado";  // Cambiar el estado del pedido a "pagado"
+    public double calcularSubtotal() {
+        return productos.stream().mapToDouble(Producto::getPrecio).sum();
     }
 
-    // Calcular el total del pedido
     public double calcularTotal() {
-        double total = 0;
-        for (Producto producto : productos) {
-            total += producto.getPrecio();  // Sumar el precio de los productos
+        double subtotal = calcularSubtotal();
+        double costoExtra = tipoPedido.calcularCostoExtra(cliente);
+        double impuestos = tipoPedido.calcularImpuestos(subtotal);
+        double descuento = subtotal * cliente.getDescuento();
+        return subtotal + costoExtra + impuestos - descuento;
+    }
+
+    public void pagar() {
+        metodoPago.procesarPago(calcularTotal());
+        estado = "pagado";
+    }
+
+    public void prepararEnvio() {
+        if (!"pagado".equals(estado)) throw new IllegalStateException("Pedido no pagado");
+        estado = "en preparación";
+    }
+
+    public void enviar() {
+        if (!"en preparación".equals(estado)) throw new IllegalStateException("Pedido no está en preparación");
+        estado = "enviado";
+    }
+
+    public void entregar() {
+        if (!"enviado".equals(estado)) throw new IllegalStateException("Pedido no ha sido enviado");
+        estado = "entregado";
+    }
+
+    public void cancelar() {
+        if ("pagado".equals(estado)) {
+            estado = "cancelado";
+        } else {
+            throw new IllegalStateException("No se puede cancelar un pedido no pagado o ya entregado");
         }
-        return total;
     }
 
-    // Métodos de acceso a los campos
-    public String getId() {
-        return id;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public String getTipoPedido() {
-        return tipoPedido;
-    }
+    // Getters
+    public String getId() { return id; }
+    public Cliente getCliente() { return cliente; }
+    public List<Producto> getProductos() { return productos; }
+    public String getEstado() { return estado; }
+    public TipoPedido getTipoPedido() { return tipoPedido; }
 }
+

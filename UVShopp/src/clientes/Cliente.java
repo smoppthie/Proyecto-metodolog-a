@@ -1,35 +1,43 @@
 package clientes;
 
 public class Cliente {
+    public enum TipoCliente { NUEVO, FRECUENTE, VIP }
+
     private String nombre;
     private String email;
     private String direccion;
-    private String tipoCliente; // Nuevo, Frecuente, VIP
+    private TipoCliente tipo;
 
-    // Constructor
-    public Cliente(String nombre, String email, String direccion, String tipoCliente) {
+    public Cliente(String nombre, String email, String direccion, String tipoClienteStr) {
         this.nombre = nombre;
         this.email = email;
         this.direccion = direccion;
-        this.tipoCliente = tipoCliente;
-    }
-
-    // Método para obtener el descuento como un número decimal
-    public double obtenerDescuento() {
-        switch(tipoCliente) {
-            case "Nuevo":
-                return 0.05;  // 5% descuento
-            case "Frecuente":
-                return 0.10;  // 10% descuento
-            case "VIP":
-                return 0.15;  // 15% descuento + envío gratis
-            default:
-                return 0;  // Sin descuento
+        switch (tipoClienteStr.toUpperCase()) {
+            case "NUEVO": this.tipo = TipoCliente.NUEVO; break;
+            case "FRECUENTE": this.tipo = TipoCliente.FRECUENTE; break;
+            case "VIP": this.tipo = TipoCliente.VIP; break;
+            default: this.tipo = TipoCliente.NUEVO;
         }
     }
 
-    // Otros métodos
-    public String getNombre() {
-        return nombre;
+    public double getDescuento() {
+        switch (tipo) {
+            case NUEVO: return 0.05;
+            case FRECUENTE: return 0.10;
+            case VIP: return 0.15;
+            default: return 0;
+        }
     }
+
+    public boolean tieneEnvioGratis() {
+        return tipo == TipoCliente.VIP;
+    }
+
+    public String getNombre() { return nombre; }
+    public String getEmail() { return email; }
+    public String getDireccion() { return direccion; }
+    public TipoCliente getTipo() { return tipo; }
 }
+
+
+
